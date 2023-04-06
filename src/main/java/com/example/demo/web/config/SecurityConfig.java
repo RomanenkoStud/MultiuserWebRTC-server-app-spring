@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .mvcMatchers("/api/v1/users/register").permitAll()
                 .mvcMatchers("/api/v1/auth/login").permitAll()
+                .mvcMatchers("/api/v1/auth/logout").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

@@ -12,10 +12,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,9 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@CrossOrigin
 @RequestMapping("api/v1/auth")
 public class AuthenticationRestController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationRestController.class);
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
@@ -41,6 +42,7 @@ public class AuthenticationRestController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequestDto requestDto) {
+        logger.info("Received login request from: email:{}", requestDto.getEmail());
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(requestDto.getEmail(),
                     requestDto.getPassword()));
@@ -54,14 +56,17 @@ public class AuthenticationRestController {
             response.put("role", user.getRole().name());
             response.put("date", user.getDateCreation());
             response.put("token", token);
+            logger.info("Successfully response to: {}", requestDto.getEmail());
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (AuthenticationException e) {
+            logger.info("Forbidden response to: {}", requestDto.getEmail());
             return new ResponseEntity<>("Invaid email/password combination", HttpStatus.FORBIDDEN);
         }
     }
 
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Received logout request");
         SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
         securityContextLogoutHandler.logout(request, response, null);
     }
