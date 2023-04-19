@@ -6,18 +6,20 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = {"id"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Pattern(regexp = ".+@.+\\..+")
@@ -40,5 +42,23 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
+    @Column(name = "image_url")
     private String imageUrl;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private UserSettings userSettings;
+
+    @Setter(AccessLevel.PRIVATE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Room> rooms = new ArrayList<>();
+
+    public void addUserSettings(UserSettings userSettings) {
+        userSettings.setUser(this);
+        this.userSettings = userSettings;
+    }
+
+    public void addRoom(Room room) {
+        room.setUser(this);
+        rooms.add(room);
+    }
 }

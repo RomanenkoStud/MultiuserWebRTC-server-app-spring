@@ -6,6 +6,7 @@ import com.example.demo.persistence.dto.UserDto;
 import com.example.demo.persistence.dto.UserReadDto;
 import com.example.demo.persistence.dto.UserUpdateDto;
 import com.example.demo.persistence.model.User;
+import com.example.demo.persistence.model.UserSettings;
 import com.example.demo.persistence.repository.UserRepository;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,8 @@ public class UserServiceImpl implements UserService {
         userDto.setPassword(encoder.encode(userDto.getPassword()));
 
         User user = modelMapper.map(userDto, User.class);
+        UserSettings userSettings = new UserSettings();
+        user.addUserSettings(userSettings);
         userRepo.save(user);
 
         return modelMapper.map(user, UserDto.class);

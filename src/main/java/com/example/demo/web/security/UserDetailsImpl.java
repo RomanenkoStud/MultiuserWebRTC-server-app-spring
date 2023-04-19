@@ -9,14 +9,20 @@ import java.util.Collection;
 import java.util.List;
 
 public class UserDetailsImpl implements UserDetails {
+    private final Long id;
     private final String email;
     private final String password;
     private final List<GrantedAuthority> rolesAndAuthorities;
 
     public UserDetailsImpl(User user) {
+        this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.rolesAndAuthorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+    }
+
+    public Long getId() {
+        return id;
     }
 
     @Override
