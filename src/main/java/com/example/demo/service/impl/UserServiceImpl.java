@@ -1,7 +1,10 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.exception.UserAlreadyExists;
+import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.persistence.dto.UserDto;
+import com.example.demo.persistence.dto.UserReadDto;
+import com.example.demo.persistence.dto.UserUpdateDto;
 import com.example.demo.persistence.model.User;
 import com.example.demo.persistence.repository.UserRepository;
 import com.example.demo.service.UserService;
@@ -9,13 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-
-import static com.example.demo.persistence.model.Role.*;
-import static com.example.demo.persistence.model.UserStatus.*;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -25,25 +25,42 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder encoder;
 
     @Override
+    @Transactional
     public UserDto addUser(UserDto userDto) {
         if (userRepo.existsByEmail(userDto.getEmail())) {
             throw new UserAlreadyExists("User with this email already exists!");
         }
-        return Optional.of(userDto)
-//                        .map(userMapper::toEntity)
-                .map(dto -> modelMapper.map(dto, User.class))
-                        .map(user -> {
-                            user.setPassword(encoder.encode(user.getPassword()));
-                            user.setRole(USER);
-                            user.setStatus(ACTIVE);
-                            return userRepo.save(user);
-                        })
-//                .map(userMapper::toDto)
-                .map(user -> modelMapper.map(user, UserDto.class))
-                .orElseThrow();
+        userDto.setPassword(encoder.encode(userDto.getPassword()));
+
+        User user = modelMapper.map(userDto, User.class);
+        userRepo.save(user);
+
+        return modelMapper.map(user, UserDto.class);
     }
 
     @Override
+    public UserReadDto getById(Long id) {
+        User user = findById(id);
+        return modelMapper.map(user, UserReadDto.class);
+    }
+
+    private User findById(Long id) {
+        return userRepo.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User does not exist by id: " + id));
+    }
+
+    @Override
+    @Transactional
+    public void updateById(Long id, UserUpdateDto userDto) {
+        User user = findById(id);
+        user.setEmail(userDto.getEmail());
+        user.setUsername(userDto.getUsername());
+        user.setPassword(encoder.encode(userDto.getPassword()));
+        user.setImageUrl(userDto.getImageUrl());
+    }
+
+    @Override
+    @Transactional
     public boolean deleteById(long id) {
         return userRepo.findById(id)
                 .map(user -> {
