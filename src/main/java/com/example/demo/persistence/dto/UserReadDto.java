@@ -5,13 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class UserDto {
+public class UserReadDto {
     private Long id;
     private String username;
     private String email;
-    private String password;
+    private LocalDateTime dateCreation;
+    private String imageUrl;
+    private String status;
 }
