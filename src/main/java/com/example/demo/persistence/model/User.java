@@ -52,6 +52,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Room> rooms = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private RoomUserConnection roomConnection;
+
     public void addUserSettings(UserSettings userSettings) {
         userSettings.setUser(this);
         this.userSettings = userSettings;
@@ -60,5 +63,10 @@ public class User {
     public void addRoom(Room room) {
         room.setUser(this);
         rooms.add(room);
+    }
+
+    public void addRoomConnection(RoomUserConnection roomConnection) {
+        roomConnection.setUser(this);
+        this.roomConnection = roomConnection;
     }
 }

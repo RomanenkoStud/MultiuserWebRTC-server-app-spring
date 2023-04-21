@@ -1,5 +1,7 @@
-package com.example.demo.exception;
+package com.example.demo.web.controller.handler;
 
+import com.example.demo.exception.UserAlreadyExists;
+import com.example.demo.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
