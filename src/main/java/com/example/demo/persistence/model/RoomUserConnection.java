@@ -14,17 +14,17 @@ import javax.persistence.*;
 @Builder
 public class RoomUserConnection {
 
-//    @EmbeddedId
-//    private RoomUserConnectionId id;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private RoomUserConnectionId id;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id"/*, insertable = false, updatable = false*/)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "room_id"/*, insertable = false, updatable = false*/)
+    @JoinColumn(name = "room_id", insertable = false, updatable = false)
     private Room room;
 }

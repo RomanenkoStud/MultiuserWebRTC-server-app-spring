@@ -41,9 +41,9 @@ public class RoomUserConnectionServiceImpl implements RoomUserConnectionService 
             throw new RoomConnectionException(String.format("User %s already connected to room %s", user.getUsername(), room.getName()));
         }
         RoomUserConnection connection = new RoomUserConnection();
-//        connection.setId(connectionId);
-        connection.setUser(user);
-        connection.setRoom(room);
+        connection.setId(connectionId);
+//        connection.setUser(user);
+//        connection.setRoom(room);
 
         connectionRepository.save(connection);
     }
