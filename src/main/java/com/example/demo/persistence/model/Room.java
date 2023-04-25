@@ -5,8 +5,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "rooms")
@@ -40,13 +38,4 @@ public class Room {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RoomUserConnection> roomUserConnections = new ArrayList<>();
-
-    public void addRoomConnection(RoomUserConnection roomConnection) {
-        roomConnection.setRoom(this);
-        this.roomUserConnections.add(roomConnection);
-    }
 }

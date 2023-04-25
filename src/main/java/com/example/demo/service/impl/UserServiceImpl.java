@@ -2,11 +2,10 @@ package com.example.demo.service.impl;
 
 import com.example.demo.exception.UserAlreadyExists;
 import com.example.demo.exception.UserNotFoundException;
-import com.example.demo.persistence.dto.UserDto;
-import com.example.demo.persistence.dto.UserReadDto;
-import com.example.demo.persistence.dto.UserUpdateDto;
+import com.example.demo.persistence.dto.UserCreateDto;
+import com.example.demo.persistence.dto.UserProfileReadDto;
+import com.example.demo.persistence.dto.UserProfileUpdateDto;
 import com.example.demo.persistence.model.User;
-import com.example.demo.persistence.model.UserSettings;
 import com.example.demo.persistence.repository.UserRepository;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,30 +20,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
-//    private final UserMapper userMapper;
     private final ModelMapper modelMapper;
     private final PasswordEncoder encoder;
 
     @Override
     @Transactional
-    public UserDto addUser(UserDto userDto) {
-        if (userRepo.existsByEmail(userDto.getEmail())) {
+    public UserCreateDto addUser(UserCreateDto userCreateDto) {
+        if (userRepo.existsByEmail(userCreateDto.getEmail())) {
             throw new UserAlreadyExists("User with this email already exists!");
         }
-        userDto.setPassword(encoder.encode(userDto.getPassword()));
+        userCreateDto.setPassword(encoder.encode(userCreateDto.getPassword()));
 
-        User user = modelMapper.map(userDto, User.class);
-        UserSettings userSettings = new UserSettings();
-        user.addUserSettings(userSettings);
+        User user = modelMapper.map(userCreateDto, User.class);
         userRepo.save(user);
 
-        return modelMapper.map(user, UserDto.class);
+        return modelMapper.map(user, UserCreateDto.class);
     }
 
     @Override
-    public UserReadDto getById(Long id) {
+    public UserProfileReadDto getById(Long id) {
         User user = findById(id);
-        return modelMapper.map(user, UserReadDto.class);
+        return modelMapper.map(user, UserProfileReadDto.class);
     }
 
     private User findById(Long id) {
@@ -54,12 +50,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateById(Long id, UserUpdateDto userDto) {
+    public void updateById(Long id, UserProfileUpdateDto userDto) {
+        validatePassword(userDto);
+
         User user = findById(id);
-        user.setEmail(userDto.getEmail());
         user.setUsername(userDto.getUsername());
-        user.setPassword(encoder.encode(userDto.getPassword()));
+        user.setEmail(userDto.getEmail());
         user.setImageUrl(userDto.getImageUrl());
+
+        String encodedPassword = encoder.encode(userDto.getPassword());
+        user.setPassword(encodedPassword);
+    }
+
+    private void validatePassword(UserProfileUpdateDto userDto) {
+        if (!userDto.getPassword().equals(userDto.getConfirmPassword())) {
+            throw new IllegalStateException("Passwords do not match. Please make sure the passwords match in both fields!");
+        }
     }
 
     @Override

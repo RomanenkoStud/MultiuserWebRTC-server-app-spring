@@ -1,5 +1,6 @@
 package com.example.demo.persistence.model;
 
+import com.example.demo.persistence.model.enums.Role;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -39,34 +40,17 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    private String status;
 
     @Column(name = "image_url")
     private String imageUrl;
-
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private UserSettings userSettings;
 
     @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Room> rooms = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private RoomUserConnection roomConnection;
-
-    public void addUserSettings(UserSettings userSettings) {
-        userSettings.setUser(this);
-        this.userSettings = userSettings;
-    }
-
     public void addRoom(Room room) {
         room.setUser(this);
         rooms.add(room);
-    }
-
-    public void addRoomConnection(RoomUserConnection roomConnection) {
-        roomConnection.setUser(this);
-        this.roomConnection = roomConnection;
     }
 }

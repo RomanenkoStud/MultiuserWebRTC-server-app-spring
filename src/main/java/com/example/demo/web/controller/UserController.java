@@ -1,8 +1,8 @@
 package com.example.demo.web.controller;
 
-import com.example.demo.persistence.dto.UserDto;
-import com.example.demo.persistence.dto.UserReadDto;
-import com.example.demo.persistence.dto.UserUpdateDto;
+import com.example.demo.persistence.dto.UserCreateDto;
+import com.example.demo.persistence.dto.UserProfileReadDto;
+import com.example.demo.persistence.dto.UserProfileUpdateDto;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,15 +20,15 @@ public class UserController {
         this.userService = userService;
     }
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserCreateDto> register(@RequestBody UserCreateDto userCreateDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.addUser(userDto));
+                .body(userService.addUser(userCreateDto));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserReadDto> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserProfileReadDto> getUserById(@PathVariable Long id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.getById(id));
@@ -36,7 +36,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<HttpStatus> updateById(@PathVariable Long id, @RequestBody UserUpdateDto userDto) {
+    public ResponseEntity<HttpStatus> updateById(@PathVariable Long id, @RequestBody UserProfileUpdateDto userDto) {
         userService.updateById(id, userDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

@@ -5,17 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import javax.validation.constraints.NotEmpty;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserReadDto {
-    private Long id;
+public class UserProfileUpdateDto {
+
+    @NotEmpty
     private String username;
+    @NotEmpty
     private String email;
-    private LocalDateTime dateCreation;
-    private String imageUrl;
     private String status;
+    private String password;
+    private String confirmPassword;
+    private String imageUrl;
 }
+
