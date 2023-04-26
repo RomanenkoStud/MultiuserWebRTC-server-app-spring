@@ -1,8 +1,11 @@
 package com.example.demo.web.controller;
 
-import com.example.demo.persistence.dto.UserDto;
+import com.example.demo.persistence.dto.UserCreateDto;
+import com.example.demo.persistence.dto.UserProfileReadDto;
+import com.example.demo.persistence.dto.UserProfileUpdateDto;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +24,28 @@ public class UserController {
         this.userService = userService;
     }
     @PostMapping("/register")
-    public UserDto register(@RequestBody UserDto userDto) {
-        logger.info("Received login request from: email:{}", userDto.getEmail());
-        logger.info("Successfully response to: email:{}", userDto.getEmail());
-        return userService.addUser(userDto);
+    public ResponseEntity<UserCreateDto> register(@RequestBody UserCreateDto userCreateDto) {
+            logger.info("Received login request from: email:{}", userDto.getEmail());
+            logger.info("Successfully response to: email:{}", userDto.getEmail());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.addUser(userCreateDto));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UserProfileReadDto> getUserById(@PathVariable Long id) {
+        logger.info("Received deleteUser request from: id:{}", id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.getById(id));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<HttpStatus> updateById(@PathVariable Long id, @RequestBody UserProfileUpdateDto userDto) {
+        userService.updateById(id, userDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("/{id}")

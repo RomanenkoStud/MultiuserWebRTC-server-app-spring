@@ -1,11 +1,19 @@
 package com.example.demo.mapper;
 
-import com.example.demo.persistence.dto.UserDto;
+import com.example.demo.persistence.dto.UserCreateDto;
 import com.example.demo.persistence.model.User;
-import org.mapstruct.Mapper;
+import org.modelmapper.AbstractConverter;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface UserMapper {
-    UserDto toDto(User user);
-    User toEntity(UserDto userDto);
+@Component
+public class UserMapper extends AbstractConverter<User, UserCreateDto> {
+    @Override
+    protected UserCreateDto convert(User user) {
+        return UserCreateDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .build();
+    }
 }
