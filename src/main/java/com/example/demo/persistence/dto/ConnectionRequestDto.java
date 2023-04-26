@@ -6,8 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
-public class RoomConnectionDto {
+public class ConnectionRequestDto {
     private String username;
     private String password;
 }

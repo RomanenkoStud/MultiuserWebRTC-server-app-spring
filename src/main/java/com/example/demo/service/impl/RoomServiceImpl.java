@@ -2,8 +2,10 @@ package com.example.demo.service.impl;
 
 import com.example.demo.exception.RoomConnectionException;
 import com.example.demo.exception.RoomNotFoundException;
+import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.persistence.dto.ConnectedUserDto;
-import com.example.demo.persistence.dto.RoomConnectionDto;
+import com.example.demo.persistence.dto.ConnectionRequestDto;
+import com.example.demo.persistence.dto.DisconnectionRequestDto;
 import com.example.demo.persistence.dto.RoomCreateDto;
 import com.example.demo.persistence.model.Room;
 import com.example.demo.persistence.model.User;
@@ -46,18 +48,57 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public void connect(Long id, RoomConnectionDto roomConnectionDto) {
+    public void connect(Long id, ConnectionRequestDto requestDto) {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new RoomNotFoundException("Can not find room by id: " + id));
-        validateRoomConnection(room, roomConnectionDto.getPassword());
+        validateRoomPassword(room, requestDto.getPassword());
 
-        List<ConnectedUserDto> connectedUsers = connections.computeIfAbsent(id, key -> new ArrayList<>());
+        validateRoomConnection(requestDto, room);
+    }
+
+    private void validateRoomConnection(ConnectionRequestDto connectionRequestDto, Room room) {
+        List<ConnectedUserDto> connectedUsers = connections.computeIfAbsent(
+                room.getId(), key -> new ArrayList<>(room.getNumberOfUsers()));
         if (connectedUsers.size() < room.getNumberOfUsers()) {
-            ConnectedUserDto connectedUser = createConnectedUser(roomConnectionDto.getUsername());
+            ConnectedUserDto connectedUser = createConnectedUser(connectionRequestDto.getUsername());
             connectedUsers.add(connectedUser);
         } else {
             throw new RoomConnectionException("Connection failed! Room is full!");
         }
+    }
+
+    @Override
+    public void disconnect(DisconnectionRequestDto requestDto) {
+        String roomName = requestDto.getRoomName();
+        Room room = roomRepository.findByName(roomName)
+                .orElseThrow(() -> new RoomNotFoundException("Can not find room by name: " + roomName));
+        Long roomId = room.getId();
+
+        List<ConnectedUserDto> connectedUsers = validateConnectionCapacity(roomId);
+        disconnectUser(requestDto, connectedUsers);
+
+        if (connectedUsers.isEmpty()) {
+            connections.remove(roomId);
+        }
+    }
+
+    private static void disconnectUser(DisconnectionRequestDto requestDto, List<ConnectedUserDto> connectedUsers) {
+        String username = requestDto.getUsername();
+        String roomName = requestDto.getRoomName();
+        var connectedUser = connectedUsers.stream()
+                .filter(user -> username.equals(user.getUsername()))
+                .findAny()
+                .orElseThrow(() -> new UserNotFoundException(
+                        String.format("Can not find user in room %s by username: %s", roomName, username)));
+        connectedUsers.remove(connectedUser);
+    }
+
+    private List<ConnectedUserDto> validateConnectionCapacity(Long roomId) {
+        var connectedUsers = connections.get(roomId);
+        if (connectedUsers == null) {
+            throw new RoomConnectionException("Disconnection failed! Room is empty!");
+        }
+        return connectedUsers;
     }
 
     @Override
@@ -77,7 +118,7 @@ public class RoomServiceImpl implements RoomService {
         return userRepository.findByUsername(username).map(User::getImageUrl).orElse(null);
     }
 
-    private static void validateRoomConnection(Room room, String password) {
+    private static void validateRoomPassword(Room room, String password) {
         if (room.isPrivate() && !room.getPassword().equals(password)) {
             throw new RoomConnectionException("Connection failed! Wrong password!");
         }

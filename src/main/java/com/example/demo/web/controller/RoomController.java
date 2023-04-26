@@ -1,6 +1,7 @@
 package com.example.demo.web.controller;
 
-import com.example.demo.persistence.dto.RoomConnectionDto;
+import com.example.demo.persistence.dto.ConnectionRequestDto;
+import com.example.demo.persistence.dto.DisconnectionRequestDto;
 import com.example.demo.persistence.dto.RoomCreateDto;
 import com.example.demo.service.RoomService;
 import com.example.demo.web.security.UserDetailsImpl;
@@ -29,12 +30,26 @@ public class RoomController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @GetMapping
+    public ResponseEntity<Long> getOne(@RequestParam String name) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(roomService.getRoomIdByName(name));
+    }
+
     @PostMapping("/connect/{id}")
     public ResponseEntity<HttpStatus> connect(
             @PathVariable Long id,
-            @RequestBody RoomConnectionDto roomConnectionDto) {
-        roomService.connect(id, roomConnectionDto);
+            @RequestBody ConnectionRequestDto connectionRequestDto) {
+        roomService.connect(id, connectionRequestDto);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/disconnect")
+    @PreAuthorize("hasRole('USER')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disconnect(@RequestBody DisconnectionRequestDto disconnectionRequestDto) {
+        roomService.disconnect(disconnectionRequestDto);
     }
 
     @DeleteMapping("/{id}")
