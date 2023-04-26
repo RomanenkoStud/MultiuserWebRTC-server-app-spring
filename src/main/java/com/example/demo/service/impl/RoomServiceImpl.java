@@ -3,10 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.exception.RoomConnectionException;
 import com.example.demo.exception.RoomNotFoundException;
 import com.example.demo.exception.UserNotFoundException;
-import com.example.demo.persistence.dto.ConnectedUserDto;
-import com.example.demo.persistence.dto.ConnectionRequestDto;
-import com.example.demo.persistence.dto.DisconnectionRequestDto;
-import com.example.demo.persistence.dto.RoomCreateDto;
+import com.example.demo.persistence.dto.*;
 import com.example.demo.persistence.model.Room;
 import com.example.demo.persistence.model.User;
 import com.example.demo.persistence.repository.RoomRepository;
@@ -14,6 +11,11 @@ import com.example.demo.persistence.repository.UserRepository;
 import com.example.demo.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,31 @@ public class RoomServiceImpl implements RoomService {
     public Long getRoomIdByName(String name) {
         return roomRepository.findByName(name)
                 .orElseThrow(() -> new RoomNotFoundException("Can not find room by name: " + name)).getId();
+    }
+
+    @Override
+    public Page<RoomInfoDto> getAll(Pageable pageable) {
+        return getRoomInfoDtos(null, pageable);
+    }
+
+    @Override
+    public Page<RoomInfoDto> getAllRoomsByUserId(Long userId, Pageable pageable) {
+        return getRoomInfoDtos(userId, pageable);
+    }
+
+    private PageImpl<RoomInfoDto> getRoomInfoDtos(@Nullable Long userId, Pageable pageable) {
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        var page = getPageByUserId(userId, pageable);
+        var roomInfoDtos = page.stream()
+                .map(this::mapToRoomInfoDto)
+                .toList();
+        return new PageImpl<>(roomInfoDtos, pageRequest, page.getTotalElements());
+    }
+
+    private Page<Room> getPageByUserId(Long userId, Pageable pageable) {
+        return userId == null
+                ? roomRepository.findAll(pageable)
+                : roomRepository.findAllByUserId(userId, pageable);
     }
 
     @Override
@@ -122,5 +149,12 @@ public class RoomServiceImpl implements RoomService {
         if (room.isPrivate() && !room.getPassword().equals(password)) {
             throw new RoomConnectionException("Connection failed! Wrong password!");
         }
+    }
+
+    private RoomInfoDto mapToRoomInfoDto(Room room) {
+        var roomInfoDto = modelMapper.map(room, RoomInfoDto.class);
+        var connectedUsers = connections.get(room.getId());
+        roomInfoDto.setConnectedUsers(connectedUsers);
+        return roomInfoDto;
     }
 }

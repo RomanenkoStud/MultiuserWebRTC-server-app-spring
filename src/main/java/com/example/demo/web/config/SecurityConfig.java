@@ -4,6 +4,7 @@ import com.example.demo.web.security.jwt.JwtConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -36,7 +37,10 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .mvcMatchers("/api/v1/users/register").permitAll()
                 .mvcMatchers("/api/v1/auth/login").permitAll()
-                .mvcMatchers("/api/v1/rooms/connect/{id}").permitAll()
+//                .mvcMatchers("/api/v1/rooms/connect/{id}").permitAll()
+                .mvcMatchers(HttpMethod.GET, "/api/v1/rooms").permitAll()
+                .mvcMatchers(HttpMethod.POST, "/api/v1/rooms/connect").permitAll()
+                .mvcMatchers("/api/v1/rooms/connect/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
