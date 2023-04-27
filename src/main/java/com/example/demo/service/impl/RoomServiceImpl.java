@@ -44,9 +44,9 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Long getRoomIdByName(String name) {
-        return roomRepository.findByName(name)
-                .orElseThrow(() -> new RoomNotFoundException("Can not find room by name: " + name)).getId();
+    public RoomInfoDto getRoomByName(String name) {
+        return mapToRoomInfoDto(roomRepository.findByName(name)
+                .orElseThrow(() -> new RoomNotFoundException("Can not find room by name: " + name)));
     }
 
     @Override
@@ -95,28 +95,25 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public void disconnect(DisconnectionRequestDto requestDto) {
-        String roomName = requestDto.getRoomName();
-        Room room = roomRepository.findByName(roomName)
-                .orElseThrow(() -> new RoomNotFoundException("Can not find room by name: " + roomName));
+    public void disconnect(Long id, String username) {
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new RoomNotFoundException("Can not find room by id: " + id));
         Long roomId = room.getId();
 
         List<ConnectedUserDto> connectedUsers = validateConnectionCapacity(roomId);
-        disconnectUser(requestDto, connectedUsers);
+        disconnectUser(id, username, connectedUsers);
 
         if (connectedUsers.isEmpty()) {
             connections.remove(roomId);
         }
     }
 
-    private static void disconnectUser(DisconnectionRequestDto requestDto, List<ConnectedUserDto> connectedUsers) {
-        String username = requestDto.getUsername();
-        String roomName = requestDto.getRoomName();
+    private static void disconnectUser(Long id, String username, List<ConnectedUserDto> connectedUsers) {
         var connectedUser = connectedUsers.stream()
                 .filter(user -> username.equals(user.getUsername()))
                 .findAny()
                 .orElseThrow(() -> new UserNotFoundException(
-                        String.format("Can not find user in room %s by username: %s", roomName, username)));
+                        String.format("Can not find user in room %s by username: %s", id, username)));
         connectedUsers.remove(connectedUser);
     }
 

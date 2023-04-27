@@ -51,8 +51,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateById(Long id, UserProfileUpdateDto userDto) {
-        validatePassword(userDto);
-
         User user = findById(id);
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
@@ -60,12 +58,6 @@ public class UserServiceImpl implements UserService {
 
         String encodedPassword = encoder.encode(userDto.getPassword());
         user.setPassword(encodedPassword);
-    }
-
-    private void validatePassword(UserProfileUpdateDto userDto) {
-        if (!userDto.getPassword().equals(userDto.getConfirmPassword())) {
-            throw new IllegalStateException("Passwords do not match. Please make sure the passwords match in both fields!");
-        }
     }
 
     @Override

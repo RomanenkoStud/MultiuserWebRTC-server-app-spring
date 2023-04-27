@@ -55,6 +55,8 @@ public class AuthenticationRestController {
             response.put("username", user.getUsername());
             response.put("role", user.getRole().name());
             response.put("date", user.getDateCreation());
+            response.put("imageUrl", user.getImageUrl());
+            response.put("status", user.getStatus());
             response.put("token", token);
             logger.info("Successfully response to: {}", requestDto.getEmail());
             return ResponseEntity.status(HttpStatus.OK).body(response);

@@ -1,7 +1,6 @@
 package com.example.demo.web.controller;
 
 import com.example.demo.persistence.dto.ConnectionRequestDto;
-import com.example.demo.persistence.dto.DisconnectionRequestDto;
 import com.example.demo.persistence.dto.RoomCreateDto;
 import com.example.demo.persistence.dto.RoomInfoDto;
 import com.example.demo.service.RoomService;
@@ -17,16 +16,17 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin
 @RequestMapping("api/v1/rooms")
 @RequiredArgsConstructor
 public class RoomController {
     private final RoomService roomService;
 
     @GetMapping("/connect")
-    public ResponseEntity<Long> getOne(@RequestParam String name) {
+    public ResponseEntity<RoomInfoDto> getOne(@RequestParam String name) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(roomService.getRoomIdByName(name));
+                .body(roomService.getRoomByName(name));
     }
 
     @GetMapping
@@ -60,10 +60,11 @@ public class RoomController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @DeleteMapping("/disconnect")
+    @DeleteMapping("/connect/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void disconnect(@RequestBody DisconnectionRequestDto disconnectionRequestDto) {
-        roomService.disconnect(disconnectionRequestDto);
+    public void disconnect(@PathVariable Long id,
+                           @RequestParam String username) {
+        roomService.disconnect(id, username);
     }
 
     @DeleteMapping("/{id}")

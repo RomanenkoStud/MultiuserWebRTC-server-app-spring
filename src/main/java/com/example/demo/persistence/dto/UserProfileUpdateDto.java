@@ -19,7 +19,6 @@ public class UserProfileUpdateDto {
     private String email;
     private String status;
     private String password;
-    private String confirmPassword;
     private String imageUrl;
 }
 

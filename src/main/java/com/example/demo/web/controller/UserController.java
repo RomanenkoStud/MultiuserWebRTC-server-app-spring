@@ -25,8 +25,8 @@ public class UserController {
     }
     @PostMapping("/register")
     public ResponseEntity<UserCreateDto> register(@RequestBody UserCreateDto userCreateDto) {
-            logger.info("Received login request from: email:{}", userDto.getEmail());
-            logger.info("Successfully response to: email:{}", userDto.getEmail());
+            logger.info("Received login request from: email:{}", userCreateDto.getEmail());
+            logger.info("Successfully response to: email:{}", userCreateDto.getEmail());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.addUser(userCreateDto));
