@@ -10,7 +10,7 @@ public interface RoomService {
 
     void create(RoomCreateDto roomDto, Long userId);
 
-    RoomInfoDto getRoomByName(String name);
+    RoomInfoDto getRoomById(Long id);
 
     Page<RoomInfoDto> getAll(Pageable pageable);
 
@@ -18,7 +18,7 @@ public interface RoomService {
 
     void connect(Long id, ConnectionRequestDto requestDto);
 
-    void disconnect(Long id, String username);
+    void disconnect(Long id, String sid);
 
     void deleteById(Long id);
 

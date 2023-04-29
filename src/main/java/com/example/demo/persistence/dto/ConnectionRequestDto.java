@@ -7,6 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 public class ConnectionRequestDto {
+    private String sid;
     private String username;
     private String password;
 }

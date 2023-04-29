@@ -23,10 +23,10 @@ public class RoomController {
     private final RoomService roomService;
 
     @GetMapping("/connect")
-    public ResponseEntity<RoomInfoDto> getOne(@RequestParam String name) {
+    public ResponseEntity<RoomInfoDto> getOne(@RequestParam Long id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(roomService.getRoomByName(name));
+                .body(roomService.getRoomById(id));
     }
 
     @GetMapping
@@ -63,8 +63,8 @@ public class RoomController {
     @DeleteMapping("/connect/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void disconnect(@PathVariable Long id,
-                           @RequestParam String username) {
-        roomService.disconnect(id, username);
+                           @RequestParam String sid) {
+        roomService.disconnect(id, sid);
     }
 
     @DeleteMapping("/{id}")
