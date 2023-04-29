@@ -52,14 +52,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateById(Long id, UserProfileUpdateDto userDto) {
         User user = findById(id);
+        user.setStatus(userDto.getStatus());
+        user.setImageUrl(userDto.getImageUrl());
         if (userDto.getUsername() != null) {
             user.setUsername(userDto.getUsername());
         }
         if (userDto.getEmail() != null) {
             user.setEmail(userDto.getEmail());
-        }
-        if (userDto.getImageUrl() != null) {
-            user.setImageUrl(userDto.getImageUrl());
         }
         if (userDto.getPassword() != null) {
             String encodedPassword = encoder.encode(userDto.getPassword());
